@@ -13,6 +13,7 @@
 
 constexpr double eps = 1e-15;
 
+
 class Table {
 
   struct Cell {
@@ -20,15 +21,17 @@ class Table {
     int row_name;
   };
 
+  using Token = std::variant<Cell, double, char>;
+  using CellData = std::variant<double, std::vector<Token>>;
+
   const std::vector<char> operations = { '+', '-', '*', '/' };
-  std::vector<std::vector<std::variant<double, std::vector<std::variant<Cell, double, char>>>>> table_;
+  std::vector<std::vector<CellData>> table_;
   std::vector<std::string> columns_;
   std::vector<std::string> rows_;
   std::unordered_map<std::string, int> columns_map_;
   std::unordered_map<int, int> rows_map_;
 
   std::vector<std::vector<bool>> used;
-
 
 public:
   Table(const std::string& filename) {
@@ -59,7 +62,7 @@ public:
         DeleteSpaces(line);
         auto tokens = ParseLine(line);
         rows_.push_back(tokens.at(0));
-        table_.push_back(std::vector<std::variant<double, std::vector<std::variant<Cell, double, char>>>>(i));
+        table_.push_back(std::vector<CellData>(i));
         if (tokens.size() != columns_.size() + 1) {
           throw std::runtime_error("Invalid table");
         }
@@ -82,19 +85,19 @@ public:
 
   }
 
+
   void DeleteSpaces(std::string& line) {
     line.erase(std::remove_if(line.begin(), line.end(), [](unsigned char a){
       return std::isspace(a);
     }), line.end());
-    // line.erase(std::remove(line.begin(), line.end(), '/r'), line.end());
   }
 
-  std::variant<double, std::vector<std::variant<Cell, double, char>>> ParseFormula(const std::string& formula) {
+  CellData ParseFormula(const std::string& formula) {
     if (formula[0] != '=') {
       return static_cast<double>(ParseNumber(formula));
     }
 
-    std::vector<std::variant<Cell, double, char>> answer(3);
+    std::vector<Token> answer(3);
     size_t idx = 0;
     while (idx < operations.size() && formula.find(operations[idx]) == std::string::npos) {
       ++idx;
@@ -115,7 +118,8 @@ public:
     return answer;
   }
 
-  std::variant<Cell, double, char> ParseCell(const std::string& cell) {
+
+  Token ParseCell(const std::string& cell) {
     size_t i = 0;
     while (i < cell.size() && !std::isdigit(cell[i])) {
       ++i;
@@ -131,6 +135,11 @@ public:
   }
 
   int ParseNumber(const std::string& cell_number) {
+    for (const char& ch: cell_number) {
+      if (!std::isdigit(ch)) {
+        throw std::runtime_error("Incorrect data in cell");
+      }
+    }
     try {
       return std::stoi(cell_number);
     }
@@ -169,6 +178,7 @@ public:
     }
   }
 
+
   double Calculate(int row, int col) {
     if (std::holds_alternative<double>(table_[row][col])) {
       return std::get<double>(table_[row][col]);
@@ -178,7 +188,7 @@ public:
       throw std::runtime_error("Infinity loop");
     }
     used[row][col] = true;
-    auto expression = std::get<std::vector<std::variant<Cell, double, char>>>(table_[row][col]);
+    auto expression = std::get<std::vector<Token>>(table_[row][col]);
     double lvalue = 0, rvalue = 0;
     if (std::holds_alternative<double>(expression[0])) {
       lvalue = std::get<double>(expression[0]);
@@ -226,6 +236,7 @@ public:
     return std::get<double>(table_[row][col]);
   }
 
+
   void Print() {
     std::cout << ", ";
     for (size_t jdx = 0; jdx + 1 < columns_.size(); ++jdx) {
@@ -247,7 +258,6 @@ public:
 
 int main(int argc, char** argv)
 {
-
   if (argc < 2) {
     std::cout << "Too few arguments" << std::endl;
     return 0;
