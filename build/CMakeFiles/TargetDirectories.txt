@@ -1,0 +1,3 @@
+/Users/ilabondarenko/Documents/repos/yadro/build/CMakeFiles/yadro.dir
+/Users/ilabondarenko/Documents/repos/yadro/build/CMakeFiles/edit_cache.dir
+/Users/ilabondarenko/Documents/repos/yadro/build/CMakeFiles/rebuild_cache.dir
