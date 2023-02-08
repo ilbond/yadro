@@ -1,4 +1,4 @@
-# yadro_test
+# Yadro
 
 ## Linux/MacOS
 Сборка через CMake :
@@ -18,7 +18,7 @@ make
 ## Windows
 Сборка через CMake :
 ```bash
-md build
+mkdir build
 cd build
 cmake ..
 cmake --build .
