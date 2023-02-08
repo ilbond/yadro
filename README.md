@@ -1,6 +1,7 @@
-# yadro_test
+# Yadro
 
 ## Linux/MacOS
+Тестировалось на MacOS, компилятор - g++ 12.2.0
 Сборка через CMake :
 
 ```bash
@@ -16,15 +17,16 @@ make
 ```
 
 ## Windows
+Тестировалось через консоль msys2 mingw, компилятор - g++ 12.2.0
 Сборка через CMake :
 ```bash
-md build
+mkdir build
 cd build
-cmake ..
+cmake -DCMAKE_CXX_COMPILER=g++ ..
 cmake --build .
 ```
 
 Пример запуска программы:
 ```bash
-yadro.exe file.csv
+./yadro.exe file.csv
 ```
